@@ -27,7 +27,21 @@ function activate(context) {
 		}
 	});
 
+
+	// Fires whenever the active text editor has been changed
+	vscode.window.onDidChangeActiveTextEditor( textEditor => {
+		if( textEditor != undefined ) {	// It can become undefined if the user clicks off
+			console.log(`New Text editor language: ${textEditor.document.languageId}`);
+		};
+	});
 	
+	// Listening for text document change
+	vscode.workspace.onDidChangeTextDocument( textDocEvent => {
+		console.log("Text document changed!");
+		console.log(`Reason: ${textDocEvent.reason}`);
+		console.log(`Content Change: ${textDocEvent.contentChanges[0].text}`);
+	});
+
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand
 	// The commandId parameter must match the command field in package.json
