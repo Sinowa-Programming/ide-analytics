@@ -13,6 +13,7 @@ const Timer = require('./scripts/timer.js'); // Load the time
  */
 
 var keyCounter = 0; 
+var backspaceCounter = 0;
 
 function activate(context) {
 
@@ -24,9 +25,12 @@ function activate(context) {
 	vscode.window.onDidChangeWindowState(newState => {
 		console.log(`Focused: ${newState.focused}`);
 		if( !newState.focused ) {
+			console.log(`Time spent in focus: ${(Timer.endTimer()/1000)} secs`)
 			Timer.startTimer();
 		} else {
 			console.log(`Time spent out of focus: ${(Timer.endTimer()/1000)} secs`)
+			Timer.startTimer();
+		
 		}
 	});
 
@@ -40,6 +44,7 @@ function activate(context) {
 	
 	// Listening for text document change
 	vscode.workspace.onDidChangeTextDocument( textDocEvent => {
+	
 		console.log("Text document changed!");
 		console.log(`Reason: ${textDocEvent.reason}`);
 		console.log(`Content Change: ${textDocEvent.contentChanges[0].text}`);
