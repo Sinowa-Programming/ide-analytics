@@ -11,6 +11,9 @@ const Timer = require('./scripts/timer.js'); // Load the time
 /**
  * @param {vscode.ExtensionContext} context
  */
+
+var keyCounter = 0; 
+
 function activate(context) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
@@ -40,6 +43,8 @@ function activate(context) {
 		console.log("Text document changed!");
 		console.log(`Reason: ${textDocEvent.reason}`);
 		console.log(`Content Change: ${textDocEvent.contentChanges[0].text}`);
+		keyCounter += 1;
+		console.log(`keyCounter: ${keyCounter}`);
 	});
 
 	// The command has been defined in the package.json file
