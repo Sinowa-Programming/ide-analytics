@@ -5,6 +5,9 @@ function startTimer() {
 }
 
 function endTimer() {   // Returns the timer duration in milliseconds( 1000ms -> 1sec ).
+    if( start_time == 0) {
+        return 0;   // The timer wasn't started
+    }
     return Date.now() - start_time;
     
 }
