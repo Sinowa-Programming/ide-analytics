@@ -57,9 +57,6 @@ firebase.auth()
   });
 
 
-firebase.auth().signInWithPopup(google)
-
-
 // Exports the data from the collection_dict
 function sendData(userId, data ) {
 	set(ref(database, 'users/' + userId), {
