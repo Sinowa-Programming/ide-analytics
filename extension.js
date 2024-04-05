@@ -40,7 +40,7 @@ signInWithPopup(getAuth(), provider)
     /** @type {OAuthCredential} */
 
     // This gives you a Google Access Token. You can use it to access the Google API.
-    var token = credential.accessToken;
+    // var token = credential.accessToken;
     // The signed-in user info.
     user = credential.user;
     // IdP data available in result.additionalUserInfo.profile.
