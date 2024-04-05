@@ -1,15 +1,16 @@
 // FIREBASE SETUP START----------------------------------------------
 
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
+// import firebase from 'firebase/compat/app';
+// import 'firebase/compat/auth';
 
 
 const { initializeApp } = require('firebase/app');
 
 const { getDatabase, ref, set } = require("firebase/database");
 
+const { GoogleAuthProvider, OAuthCredential, getAuth, signInWithPopup } = require("firebase/auth");
 
-require("firebase/auth");
+
 
 // Import the functions you need from the SDKs you need
 
@@ -32,17 +33,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app)
 var user;
-var provider = new firebase.auth.GoogleAuthProvider();
-firebase.auth()
-  .signInWithPopup(provider)
-  .then((result) => {
-    /** @type {firebase.auth.OAuthCredential} */
-    var credential = result.credential;
+var provider = new GoogleAuthProvider;
+
+signInWithPopup(getAuth(), provider)
+  .then((credential) => {
+    /** @type {OAuthCredential} */
 
     // This gives you a Google Access Token. You can use it to access the Google API.
     var token = credential.accessToken;
     // The signed-in user info.
-    user = result.user;
+    user = credential.user;
     // IdP data available in result.additionalUserInfo.profile.
       // ...
   }).catch((error) => {
