@@ -49,7 +49,7 @@ const vscode = require('vscode');
 const Timer = require('./scripts/timer.js'); // Load the timer
 
 
-var CALL_TIME = 1000 * 30	// 30 seconds
+var CALL_TIME = 1000 * 10	// How often the data is sent to the server
 
 var currentLineCnt = undefined;
 var currentEditor = undefined;
@@ -74,30 +74,44 @@ let collection_dict={
  * @param {vscode.ExtensionContext} context
  */
 
-const email = "someemail@email.com"
-const password = "password2.0"
+
+var extensionSettings = vscode.workspace.getConfiguration('ide-analytics'); // 
+
+function signIn() {
+	extensionSettings = vscode.workspace.getConfiguration('ide-analytics')
+
+	signInWithEmailAndPassword(getAuth(), extensionSettings.get("email"), extensionSettings.get("password")).then(userCredential => {
+		// User is authenticated
+		user = userCredential.user;
+		console.log(`User ${user.email} is authenticated`);
+	})
+	.catch(() => {
+		// Authentication failed
+		console.error('Authentication failed');
+	});
+};
+
 
 function activate(context) {
 
 	console.log("Extension started");
 
-	signInWithEmailAndPassword(getAuth(), email, password).then(userCredential => {
-		// User is authenticated
-		user = userCredential.user;
-		console.log(`User ${user.email} is authenticated`);
-	})
-	.catch(error => {
-		// Authentication failed
-		console.error('Authentication failed:', error);
-	});
-	  
+	signIn();	// Sign in if the user has already defined the username and passwird
 
 	// Calls the function every x ms.
 	const setCallInterval = function() {
-		console.log("data sent");
-		sendData( user.uid, collection_dict );  // user.UID doesn't work. Fix this
+		if( user.email != undefined ) {	// only send data if the user is logged in
+			sendData( user.email.split('@')[0], collection_dict );	// They key is the first section of the email
+		}
 	}
 	setInterval(setCallInterval, CALL_TIME);	
+
+	// Sign in whenever settings are changed
+	vscode.workspace.onDidChangeConfiguration(() => {
+		signIn();
+	});
+	
+
 
 	// Fires whenever the focus changes on the window( like when the user clicks off )
 	vscode.window.onDidChangeWindowState(newState => {
@@ -147,7 +161,7 @@ function activate(context) {
 	// The commandId parameter must match the command field in package.json
 	let disposable = vscode.commands.registerCommand('ide-analytics.helloWorld', function () {
 		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from IDE Analytics!');
+		
 	});
 
 	context.subscriptions.push(disposable);
