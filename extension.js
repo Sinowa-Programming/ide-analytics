@@ -1,5 +1,5 @@
 // FIREBASE SETUP START----------------------------------------------
-
+const { signInWithEmailAndPassword, getAuth  } = require("firebase/auth");
 
 const { initializeApp } = require('firebase/app');
 
@@ -25,6 +25,8 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app)
+var user
+
 
 
 // Exports the data from the collection_dict
@@ -72,16 +74,28 @@ let collection_dict={
  * @param {vscode.ExtensionContext} context
  */
 
-
+const email = "someemail@email.com"
+const password = "password2.0"
 
 function activate(context) {
 
 	console.log("Extension started");
 
+	signInWithEmailAndPassword(getAuth(), email, password).then(userCredential => {
+		// User is authenticated
+		user = userCredential.user;
+		console.log(`User ${user.email} is authenticated`);
+	})
+	.catch(error => {
+		// Authentication failed
+		console.error('Authentication failed:', error);
+	});
+	  
+
 	// Calls the function every x ms.
 	const setCallInterval = function() {
 		console.log("data sent");
-		sendData( "rando", collection_dict );  
+		sendData( user.uid, collection_dict );  // user.UID doesn't work. Fix this
 	}
 	setInterval(setCallInterval, CALL_TIME);	
 

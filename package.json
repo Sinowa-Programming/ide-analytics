@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "express": "^4.19.2",
-    "firebase": "^10.10.0"
+    "firebase": "^10.10.0",
+    "firebaseui": "^6.1.0"
   }
 }
