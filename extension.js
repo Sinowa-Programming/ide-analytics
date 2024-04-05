@@ -1,9 +1,15 @@
 // FIREBASE SETUP START----------------------------------------------
 
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+
 
 const { initializeApp } = require('firebase/app');
 
 const { getDatabase, ref, set } = require("firebase/database");
+
+
+require("firebase/auth");
 
 // Import the functions you need from the SDKs you need
 
@@ -25,6 +31,33 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app)
+var user;
+var provider = new firebase.auth.GoogleAuthProvider();
+firebase.auth()
+  .signInWithPopup(provider)
+  .then((result) => {
+    /** @type {firebase.auth.OAuthCredential} */
+    var credential = result.credential;
+
+    // This gives you a Google Access Token. You can use it to access the Google API.
+    var token = credential.accessToken;
+    // The signed-in user info.
+    user = result.user;
+    // IdP data available in result.additionalUserInfo.profile.
+      // ...
+  }).catch((error) => {
+    // Handle Errors here.
+    var errorCode = error.code;
+    var errorMessage = error.message;
+    // The email of the user's account used.
+    var email = error.email;
+    // The firebase.auth.AuthCredential type that was used.
+    var credential = error.credential;
+    // ...
+  });
+
+
+firebase.auth().signInWithPopup(google)
 
 
 // Exports the data from the collection_dict
@@ -81,7 +114,7 @@ function activate(context) {
 	// Calls the function every x ms.
 	const setCallInterval = function() {
 		console.log("data sent");
-		sendData( "rando", collection_dict );  
+		sendData( user , collection_dict );  
 	}
 	setInterval(setCallInterval, CALL_TIME);	
 
