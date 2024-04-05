@@ -15,6 +15,23 @@
   ],
   "main": "./extension.js",
   "contributes": {
+    "configuration": [
+      {
+        "title": "User Authentication",
+        "properties": {
+          "ide-analytics.email": {
+            "type": "string",
+            "default": "",
+            "description": "The user's email."
+          },
+          "ide-analytics.password": {
+            "type": "string",
+            "default": "",
+            "description": "The user's password."
+          }
+        }
+      }
+    ],
     "commands": [
       {
         "command": "ide-analytics.helloWorld",
@@ -38,6 +55,7 @@
   },
   "dependencies": {
     "express": "^4.19.2",
-    "firebase": "^10.10.0"
+    "firebase": "^10.10.0",
+    "firebaseui": "^6.1.0"
   }
 }
