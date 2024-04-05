@@ -1,8 +1,53 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-const vscode = require('vscode');
-const Timer = require('./scripts/timer.js'); // Load the time
+// FIREBASE SETUP START----------------------------------------------
 
+
+const { initializeApp } = require('firebase/app');
+
+const { getDatabase, ref, set } = require("firebase/database");
+
+// Import the functions you need from the SDKs you need
+
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// The app's Firebase configuration
+const firebaseConfig = {
+	apiKey: "AIzaSyCFyDc88KX70VqY7BYx2TlNt6le0xHfwpc",
+	authDomain: "ide-analytics.firebaseapp.com",
+	databaseURL: "https://ide-analytics-default-rtdb.firebaseio.com/",
+	projectId: "ide-analytics",
+	storageBucket: "ide-analytics.appspot.com",
+	messagingSenderId: "242405334050",
+	appId: "1:242405334050:web:c3528d0ce2534fb585be7b",
+	measurementId: "G-9KCDZRQ9C6"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app)
+
+
+// Exports the data from the collection_dict
+function sendData(userId, data ) {
+	set(ref(database, 'users/' + userId), {
+		keyCounter: data["keyCounter"], 
+		keyPressHistory : data["keyPressHistory"],
+		totalTimeInFocus : data["totalTimeInFocus"],
+		totalTimeOutFocus : data["totalTimeOutFocus"],
+		currentLanguage : data["currentLanguage"],
+		linesAdded : data["linesAdded"],
+		linesRemoved : data["linesRemoved"],
+	});
+}
+
+// FIREBASE SETUP END----------------------------------------------
+
+// DATA COLLECTION SETUP START-------------------------------------
+const vscode = require('vscode');
+const Timer = require('./scripts/timer.js'); // Load the timer
+
+
+var CALL_TIME = 1000 * 30	// 30 seconds
 
 var currentLineCnt = undefined;
 var currentEditor = undefined;
@@ -17,7 +62,9 @@ let collection_dict={
 	"linesRemoved" : 0,
 };
 
+// DATA COLLECTION SETUP END-------------------------------------
 
+// MAIN START----------------------------------------------------
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 
@@ -25,18 +72,17 @@ let collection_dict={
  * @param {vscode.ExtensionContext} context
  */
 
-// var keyCounter = 0; 
-// var backspaceCounter = 0;	// Not plausible atm
-
 
 
 function activate(context) {
 
-	
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	//console.log('Congratulations, your extension "ide-analytics" is now active!');
+	console.log("Extension started");
 
+	// Calls the function every x ms.
+	function setCallInterval() {
+		sendData( "rando", collection_dict );
+		setInterval(setCallInterval, CALL_TIME);	  
+	}
 
 	// Fires whenever the focus changes on the window( like when the user clicks off )
 	vscode.window.onDidChangeWindowState(newState => {
@@ -45,19 +91,14 @@ function activate(context) {
 			collection_dict["currentLanguage"] = currentEditor.document.languageId;
 			currentLineCnt = currentEditor.document.lineCount;
 		}
-		//console.log(`Focused: ${newState.focused}`);
 		if( !newState.focused ) {
-			//console.log(`Time spent in focus: ${(Timer.endTimer()/1000)} secs`)
 			collection_dict["totalTimeInFocus"] += (Timer.endTimer()/1000);
 			Timer.startTimer();
 		} else {
-			//console.log(`Time spent out of focus: ${(Timer.endTimer()/1000)} secs`)
 			collection_dict["totalTimeOutFocus"] += (Timer.endTimer()/1000);
 			Timer.startTimer();
 		
-		}
-		console.log(`Collection dict(LA): ${collection_dict["linesRemoved"]} | Collection dict(LR): ${collection_dict["linesAdded"]}`,);
-		
+		}		
 	});
 
 
@@ -66,18 +107,14 @@ function activate(context) {
 		if( textEditor != undefined ) {	// It can become undefined if the user clicks off
 			currentLineCnt = textEditor.document.lineCount;
 			currentEditor = textEditor;
-			console.log(`Current editor set: ${currentEditor}`);
-			//console.log(`New Text editor language: ${textEditor.document.languageId}`);
 			collection_dict["currentLanguage"] = textEditor.document.languageId;
 		};
-		console.log(`Collection dict(LA): ${collection_dict["linesRemoved"]} | Collection dict(LR): ${collection_dict["linesAdded"]}`,);
 	});
 	
 	// Listening for text document change
 	vscode.workspace.onDidChangeTextDocument( textDocEvent => {
 		if( currentEditor != undefined && (currentLineCnt != currentEditor.document.lineCount)) {	// current editor may be undefined when starting the extension
 			let lineDiff = currentLineCnt - currentEditor.document.lineCount;
-			console.log(`Line diff: ${lineDiff}`);
 			if( lineDiff > 0 ) {	// line(s) was removed
 				collection_dict["linesRemoved"] += Math.abs(lineDiff);
 			} else {	// line(s) were added
@@ -85,25 +122,15 @@ function activate(context) {
 			}
 			currentLineCnt = currentEditor.document.lineCount;
 		}
-		//console.log("Text document changed!");
-		//console.log(`Reason: ${textDocEvent.reason}`);
-		//console.log(`Content Change: ${textDocEvent.contentChanges[0].text}`);
 		collection_dict["keyPressHistory"] += textDocEvent.contentChanges[0].text
-		// keyCounter += 1;
 		collection_dict["keyCounter"] += 1;
-		//console.log(`keyCounter: ${keyCounter}`);
 		collection_dict["currentLanguage"] = textDocEvent.document.languageId;
-		console.log(`Collection dict(LA): ${collection_dict["linesRemoved"]} | Collection dict(LR): ${collection_dict["linesAdded"]}`,);
-
 	});
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand
 	// The commandId parameter must match the command field in package.json
 	let disposable = vscode.commands.registerCommand('ide-analytics.helloWorld', function () {
-		// The code you place here will be executed every time your command is executed
-		console.log(`Collection dict(LA): ${collection_dict["linesRemoved"]} | Collection dict(LR): ${collection_dict["linesAdded"]}`,);
-
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from IDE Analytics!');
 	});
@@ -118,3 +145,6 @@ module.exports = {
 	activate,
 	deactivate
 }
+
+
+// MAIN END----------------------------------------------------
