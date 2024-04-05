@@ -79,10 +79,11 @@ function activate(context) {
 	console.log("Extension started");
 
 	// Calls the function every x ms.
-	function setCallInterval() {
-		sendData( "rando", collection_dict );
-		setInterval(setCallInterval, CALL_TIME);	  
+	const setCallInterval = function() {
+		console.log("data sent");
+		sendData( "rando", collection_dict );  
 	}
+	setInterval(setCallInterval, CALL_TIME);	
 
 	// Fires whenever the focus changes on the window( like when the user clicks off )
 	vscode.window.onDidChangeWindowState(newState => {
